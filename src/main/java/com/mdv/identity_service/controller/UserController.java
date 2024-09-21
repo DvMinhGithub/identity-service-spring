@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mdv.identity_service.dto.request.UserCreateRequest;
 import com.mdv.identity_service.dto.request.UserUpdateRequest;
+import com.mdv.identity_service.dto.response.ApiRespone;
 import com.mdv.identity_service.entity.User;
 import com.mdv.identity_service.service.UserService;
 
@@ -26,29 +27,32 @@ public class UserController {
     UserService userService;
 
     @PostMapping
-    public User createRequest(@RequestBody @Valid UserCreateRequest request) {
-        return userService.createRequest(request);
+    public ApiRespone<User> createRequest(@RequestBody @Valid UserCreateRequest request) {
+        User user = userService.createRequest(request);
+        return new ApiRespone<>(200, null, user);
     }
 
     @GetMapping
-    public List<User> getUsers() {
-        return userService.getUsers();
+    public ApiRespone<List<User>> getUsers() {
+        List<User> users = userService.getUsers();
+        return new ApiRespone<>(200, null, users);
     }
 
     @GetMapping("/{userId}")
-    public User getUser(@PathVariable String userId) {
-        return userService.getUser(userId);
+    public ApiRespone<User> getUser(@PathVariable String userId) {
+        User user = userService.getUser(userId);
+        return new ApiRespone<>(200, null, user);
     }
 
     @PutMapping("/{userId}")
-    public User updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
-        return userService.updateUser(userId, request);
+    public ApiRespone<User> updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
+        User user = userService.updateUser(userId, request);
+        return new ApiRespone<>(200, null, user);
     }
 
     @DeleteMapping("/{userId}")
-    public String deleteUser(@PathVariable String userId) {
+    public ApiRespone<Void> deleteUser(@PathVariable String userId) {
         userService.deleteUser(userId);
-        return "User has been deleted";
+        return new ApiRespone<>(200, null, null);
     }
-
 }

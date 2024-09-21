@@ -5,11 +5,13 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.mdv.identity_service.dto.response.ApiRespone;
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(value = RuntimeException.class)
-    ResponseEntity<String> handleRuntimeException(RuntimeException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
+    ResponseEntity<ApiRespone> handleRuntimeException(RuntimeException e) {
+        return ResponseEntity.badRequest().body(new ApiRespone(400, e.getMessage(), null));
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
