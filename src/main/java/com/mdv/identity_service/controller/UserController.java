@@ -17,6 +17,8 @@ import com.mdv.identity_service.dto.request.UserUpdateRequest;
 import com.mdv.identity_service.entity.User;
 import com.mdv.identity_service.service.UserService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -24,7 +26,7 @@ public class UserController {
     UserService userService;
 
     @PostMapping
-    public User createRequest(@RequestBody UserCreateRequest request) {
+    public User createRequest(@RequestBody @Valid UserCreateRequest request) {
         return userService.createRequest(request);
     }
 
