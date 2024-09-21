@@ -1,8 +1,7 @@
 package com.mdv.identity_service.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import java.time.LocalDate;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,11 +10,13 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Setter
 @Builder
-@AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class ApiRespone<T> {
-    int code;
-    String message;
-    T result;
+public class UserResponse {
+    String id;
+    String username;
+    String password;
+    String firstName;
+    String lastName;
+    LocalDate dob;
+
 }
