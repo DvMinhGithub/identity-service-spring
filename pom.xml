@@ -31,6 +31,7 @@
 		<mapstruct.version>1.6.2</mapstruct.version>
 		<projectlombok-lombok.version>1.18.34</projectlombok-lombok.version>
 		<lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
+		<spring-security-crypto.version>6.3.3</spring-security-crypto.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -65,6 +66,11 @@
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct-processor</artifactId>
 			<version>${mapstruct.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-crypto</artifactId>
+			<version>${spring-security-crypto.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
