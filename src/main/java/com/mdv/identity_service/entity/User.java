@@ -1,18 +1,25 @@
 package com.mdv.identity_service.entity;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class User {
     @Id
@@ -23,4 +30,5 @@ public class User {
     String firstName;
     String lastName;
     LocalDate dob;
+    Set<String> roles;
 }

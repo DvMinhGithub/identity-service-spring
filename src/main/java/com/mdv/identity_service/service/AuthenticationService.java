@@ -1,17 +1,20 @@
 package com.mdv.identity_service.service;
 
 import java.util.Date;
+import java.util.StringJoiner;
 import java.text.ParseException;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.mdv.identity_service.dto.request.AuthenticationRequest;
 import com.mdv.identity_service.dto.request.IntrospectRequest;
 import com.mdv.identity_service.dto.response.AuthenticationResponse;
 import com.mdv.identity_service.dto.response.IntrospectResponse;
+import com.mdv.identity_service.entity.User;
 import com.mdv.identity_service.repository.UserRepository;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -65,7 +68,7 @@ public class AuthenticationService {
             throw new RuntimeException("Invalid password");
         }
 
-        String token = generateToken(user.getUsername());
+        String token = generateToken(user);
 
         return AuthenticationResponse.builder()
                 .token(token)
@@ -73,14 +76,15 @@ public class AuthenticationService {
                 .build();
     }
 
-    private String generateToken(String username) {
+    private String generateToken(User user) {
         JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.HS256).build();
 
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                .subject(username)
+                .subject(user.getUsername())
                 .issuer("mdv")
                 .issueTime(new Date())
                 .expirationTime(new Date(new Date().getTime() + 60 * 1000))
+                .claim("scope", buildScope(user))
                 .build();
 
         Payload payload = new Payload(claims.toJSONObject());
@@ -93,5 +97,13 @@ public class AuthenticationService {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    String buildScope(User user) {
+        StringJoiner joiner = new StringJoiner(" ");
+        if (!CollectionUtils.isEmpty(user.getRoles()))
+            user.getRoles().forEach(joiner::add);
+
+        return joiner.toString();
     }
 }
