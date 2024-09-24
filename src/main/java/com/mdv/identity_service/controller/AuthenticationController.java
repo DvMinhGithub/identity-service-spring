@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class AuthenticationController {
     AuthenticationService authenticationService;
 
-    @PostMapping("/login")
+    @PostMapping("/token")
     ApiRespone<AuthenticationResponse> postMethodName(@RequestBody AuthenticationRequest request) {
         var result = authenticationService.authenticated(request);
         return ApiRespone.<AuthenticationResponse>builder().code(200).result(result).build();
