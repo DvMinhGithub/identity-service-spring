@@ -4,6 +4,9 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +27,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class UserService {
     UserRepository userRepository;
-    UserMapper UserMapper;
+    UserMapper userMapper;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -35,7 +38,7 @@ public class UserService {
             throw new RuntimeException("Username already exists: " + request.getUsername());
         }
 
-        User user = UserMapper.mapToUser(request);
+        User user = userMapper.mapToUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         HashSet<String> roles = new HashSet<>();
@@ -46,22 +49,32 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public List<User> getUsers() {
-        return userRepository.findAll();
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<UserResponse> getUsers() {
+        return userRepository.findAll().stream().map(userMapper::mapToUserResponse).toList();
     }
 
+    @PostAuthorize("returnObject.username == authentication.name or hasRole('ADMIN')")
     public UserResponse getUser(String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
-        return UserMapper.mapToUserResponse(user);
+        return userMapper.mapToUserResponse(user);
+    }
+
+    public UserResponse getMyInfo() {
+        var context = SecurityContextHolder.getContext();
+        String name = context.getAuthentication().getName();
+        User user = userRepository.findByUsername(name)
+                .orElseThrow(() -> new RuntimeException("User not found: " + name));
+        return userMapper.mapToUserResponse(user);
     }
 
     public UserResponse updateUser(String userId, UserUpdateRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
-        UserMapper.updateUser(user, request);
+        userMapper.updateUser(user, request);
 
-        return UserMapper.mapToUserResponse(userRepository.save(user));
+        return userMapper.mapToUserResponse(userRepository.save(user));
     }
 
     public void deleteUser(String userId) {
