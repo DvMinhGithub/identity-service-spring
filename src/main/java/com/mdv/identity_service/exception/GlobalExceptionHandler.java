@@ -1,6 +1,7 @@
 package com.mdv.identity_service.exception;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -22,4 +23,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(new ApiRespone<>(400, message, null));
     }
 
+    @ExceptionHandler(value = AccessDeniedException.class)
+    ResponseEntity<ApiRespone<Object>> handleAccessDeniedException(AccessDeniedException e) {
+        return ResponseEntity.status(403).body(
+                ApiRespone.builder().code(403).message("You do not have permision").build());
+    }
 }
