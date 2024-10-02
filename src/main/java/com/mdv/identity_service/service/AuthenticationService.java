@@ -83,7 +83,7 @@ public class AuthenticationService {
                 .subject(user.getUsername())
                 .issuer("mdv")
                 .issueTime(new Date())
-                .expirationTime(new Date(new Date().getTime() + 60 * 1000))
+                .expirationTime(new Date(new Date().getTime() + 24 * 60 * 60 * 1000))
                 .claim("scope", buildScope(user))
                 .build();
 
@@ -102,7 +102,7 @@ public class AuthenticationService {
     String buildScope(User user) {
         StringJoiner joiner = new StringJoiner(" ");
         if (!CollectionUtils.isEmpty(user.getRoles()))
-            user.getRoles().forEach(joiner::add);
+            user.getRoles();
 
         return joiner.toString();
     }
