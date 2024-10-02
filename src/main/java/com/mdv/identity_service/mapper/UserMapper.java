@@ -20,5 +20,6 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "username", ignore = true)
     @Mapping(target = "roles", ignore = true)
+    @Mapping(target = "password", ignore = true)
     void updateUser(@MappingTarget User user, UserUpdateRequest request);
 }

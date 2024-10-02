@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.mdv.identity_service.entity.User;
 import com.mdv.identity_service.enums.Role;
+import com.mdv.identity_service.repository.RoleRepository;
 import com.mdv.identity_service.repository.UserRepository;
 
 import lombok.AccessLevel;
@@ -25,16 +26,16 @@ public class ApplicationInitConfig {
     PasswordEncoder passwordEncoder;
 
     @Bean
-    ApplicationRunner applicationRunner(UserRepository userRepository) {
+    ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository) {
         return args -> {
             if (userRepository.findByUsername("admin").isEmpty()) {
-                var roles = new HashSet<String>();
-                roles.add(Role.ADMIN.name());
+
+                var roles = roleRepository.findByName(Role.ADMIN.name());
 
                 User user = User.builder()
                         .username("admin")
                         .password(passwordEncoder.encode("admin"))
-                        // .roles(roles)
+                        .roles(new HashSet<>(roles))
                         .build();
 
                 userRepository.save(user);

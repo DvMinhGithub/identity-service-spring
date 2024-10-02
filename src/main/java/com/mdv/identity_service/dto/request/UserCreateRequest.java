@@ -1,6 +1,7 @@
 package com.mdv.identity_service.dto.request;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -23,4 +24,6 @@ public class UserCreateRequest {
     String firstName;
     String lastName;
     LocalDate dob;
+
+    List<String> roles;
 }

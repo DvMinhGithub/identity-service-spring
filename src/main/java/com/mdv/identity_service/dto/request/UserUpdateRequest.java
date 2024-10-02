@@ -1,6 +1,7 @@
 package com.mdv.identity_service.dto.request;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -16,4 +17,5 @@ public class UserUpdateRequest {
     String firstName;
     String lastName;
     LocalDate dob;
+    List<String> roles;
 }

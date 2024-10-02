@@ -49,11 +49,10 @@ public class UserController {
     }
 
     @GetMapping("/myInfo")
-    ApiRespone<UserResponse> getMyInfo () {
+    ApiRespone<UserResponse> getMyInfo() {
         UserResponse user = userService.getMyInfo();
         return new ApiRespone<>(200, null, user);
     }
-    
 
     @PutMapping("/{userId}")
     ApiRespone<UserResponse> updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
@@ -64,6 +63,6 @@ public class UserController {
     @DeleteMapping("/{userId}")
     ApiRespone<Void> deleteUser(@PathVariable String userId) {
         userService.deleteUser(userId);
-        return new ApiRespone<>(200, null, null);
+        return new ApiRespone<>(200, "Delete user successfully", null);
     }
 }

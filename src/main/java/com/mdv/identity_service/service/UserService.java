@@ -14,8 +14,8 @@ import com.mdv.identity_service.dto.request.UserCreateRequest;
 import com.mdv.identity_service.dto.request.UserUpdateRequest;
 import com.mdv.identity_service.dto.response.UserResponse;
 import com.mdv.identity_service.entity.User;
-import com.mdv.identity_service.enums.Role;
 import com.mdv.identity_service.mapper.UserMapper;
+import com.mdv.identity_service.repository.RoleRepository;
 import com.mdv.identity_service.repository.UserRepository;
 
 import lombok.AccessLevel;
@@ -27,6 +27,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class UserService {
     UserRepository userRepository;
+    RoleRepository roleRepository;
     UserMapper userMapper;
 
     @Autowired
@@ -41,11 +42,9 @@ public class UserService {
         User user = userMapper.mapToUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        HashSet<String> roles = new HashSet<>();
-        roles.add(Role.USER.name());
-
-        // user.setRoles(roles);
-
+        var roles = roleRepository.findAllById(request.getRoles());
+        user.setRoles(new HashSet<>(roles));
+        
         return userRepository.save(user);
     }
 
@@ -73,6 +72,10 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
         userMapper.updateUser(user, request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        var roles = roleRepository.findAllById(request.getRoles());
+        user.setRoles(new HashSet<>(roles));
 
         return userMapper.mapToUserResponse(userRepository.save(user));
     }
