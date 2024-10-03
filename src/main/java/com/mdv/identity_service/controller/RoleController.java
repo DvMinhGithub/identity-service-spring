@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mdv.identity_service.dto.request.RoleRequest;
-import com.mdv.identity_service.dto.response.ApiRespone;
+import com.mdv.identity_service.dto.response.ApiResponse;
 import com.mdv.identity_service.dto.response.RoleResponse;
 import com.mdv.identity_service.service.RoleService;
 
@@ -27,25 +27,25 @@ public class RoleController {
     RoleService roleService;
 
     @PostMapping
-    ApiRespone<RoleResponse> create(@RequestBody RoleRequest request) {
-        return ApiRespone.<RoleResponse>builder()
+    ApiResponse<RoleResponse> create(@RequestBody RoleRequest request) {
+        return ApiResponse.<RoleResponse>builder()
                 .code(201)
                 .result(roleService.create(request))
                 .build();
     }
 
     @GetMapping
-    ApiRespone<List<RoleResponse>> getAll() {
-        return ApiRespone.<List<RoleResponse>>builder()
+    ApiResponse<List<RoleResponse>> getAll() {
+        return ApiResponse.<List<RoleResponse>>builder()
                 .code(200)
                 .result(roleService.getAll())
                 .build();
     }
 
     @DeleteMapping("/{name}")
-    ApiRespone<Void> delete(@PathVariable String name) {
+    ApiResponse<Void> delete(@PathVariable String name) {
         roleService.delete(name);
-        return ApiRespone.<Void>builder()
+        return ApiResponse.<Void>builder()
                 .code(200)
                 .message("Deleted role")
                 .build();

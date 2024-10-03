@@ -14,7 +14,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ApiRespone<T> {
+public class ApiResponse<T> {
     int code;
     String message;
     T result;

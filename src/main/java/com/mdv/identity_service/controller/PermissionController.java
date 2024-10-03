@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mdv.identity_service.dto.request.PermissionRequest;
-import com.mdv.identity_service.dto.response.ApiRespone;
+import com.mdv.identity_service.dto.response.ApiResponse;
 import com.mdv.identity_service.dto.response.PermissionResponse;
 import com.mdv.identity_service.service.PermissionService;
 
@@ -27,25 +27,25 @@ public class PermissionController {
     PermissionService permissionService;
 
     @PostMapping
-    ApiRespone<PermissionResponse> create(@RequestBody PermissionRequest request) {
-        return ApiRespone.<PermissionResponse>builder()
+    ApiResponse<PermissionResponse> create(@RequestBody PermissionRequest request) {
+        return ApiResponse.<PermissionResponse>builder()
                 .code(201)
                 .result(permissionService.create(request))
                 .build();
     }
 
     @GetMapping
-    ApiRespone<List<PermissionResponse>> getAll() {
-        return ApiRespone.<List<PermissionResponse>>builder()
+    ApiResponse<List<PermissionResponse>> getAll() {
+        return ApiResponse.<List<PermissionResponse>>builder()
                 .code(200)
                 .result(permissionService.getAll())
                 .build();
     }
 
     @DeleteMapping("/{permission}")
-    ApiRespone<Void> delete(@PathVariable String permission) {
+    ApiResponse<Void> delete(@PathVariable String permission) {
         permissionService.delete(permission);
-        return ApiRespone.<Void>builder()
+        return ApiResponse.<Void>builder()
                 .code(200)
                 .message("Deleted permission")
                 .build();

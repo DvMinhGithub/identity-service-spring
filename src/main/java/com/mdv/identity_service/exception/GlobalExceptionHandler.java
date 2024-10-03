@@ -7,25 +7,70 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.mdv.identity_service.dto.response.ApiRespone;
+import com.mdv.identity_service.dto.response.ApiResponse;
+
+import lombok.extern.slf4j.Slf4j;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
+
     @ExceptionHandler(value = RuntimeException.class)
-    ResponseEntity<ApiRespone<Void>> handleRuntimeException(RuntimeException e) {
-        return ResponseEntity.badRequest().body(new ApiRespone<>(400, e.getMessage(), null));
+    public ResponseEntity<ApiResponse<?>> handleRuntimeException(RuntimeException e) {
+        log.error("Internal server error", e);
+
+        ApiErrorCode apiErrorCode = ApiErrorCode.UNCATEGORIZED_EXCEPTION;
+        ApiResponse<?> response = ApiResponse.builder()
+                .code(apiErrorCode.getHttpCode())
+                .message(apiErrorCode.getErrorMessage())
+                .build();
+
+        return ResponseEntity.status(apiErrorCode.getHttpCode()).body(response);
+    }
+
+    @ExceptionHandler(value = ApiException.class)
+    public ResponseEntity<ApiResponse<?>> handleApiException(ApiException e) {
+        log.error("API error", e);
+
+        ApiErrorCode apiException = e.getApiErrorCode();
+        ApiResponse<?> response = ApiResponse.builder()
+                .code(e.getApiErrorCode().getHttpCode())
+                .message(e.getApiErrorCode().getErrorMessage())
+                .build();
+
+        return ResponseEntity.status(apiException.getHttpStatus()).body(response);
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    ResponseEntity<ApiRespone<Void>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public ResponseEntity<ApiResponse<?>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        log.error("Invalid request", e);
+
+        ApiErrorCode apiErrorCode = ApiErrorCode.INVALID_KEY;
+
         FieldError fieldError = e.getBindingResult().getFieldError();
-        String message = (fieldError != null) ? fieldError.getDefaultMessage() : "Invalid request";
-        return ResponseEntity.badRequest().body(new ApiRespone<>(400, message, null));
+        String message = (fieldError != null) ? fieldError.getDefaultMessage()
+                : apiErrorCode.getErrorMessage();
+
+        ApiResponse<?> response = ApiResponse.builder()
+                .code(apiErrorCode.getHttpCode())
+                .message(message)
+                .build();
+
+        return ResponseEntity.status(apiErrorCode.getHttpCode())
+                .body(response);
     }
 
     @ExceptionHandler(value = AccessDeniedException.class)
-    ResponseEntity<ApiRespone<Object>> handleAccessDeniedException(AccessDeniedException e) {
-        return ResponseEntity.status(403).body(
-                ApiRespone.builder().code(403).message("You do not have permision").build());
+    public ResponseEntity<ApiResponse<?>> handleAccessDeniedException(AccessDeniedException e) {
+        log.error("Access denied", e);
+
+        ApiErrorCode apiErrorCode = ApiErrorCode.UNAUTHORIZED;
+        ApiResponse<?> response = ApiResponse.builder()
+                .code(apiErrorCode.getHttpCode())
+                .message(apiErrorCode.getErrorMessage())
+                .build();
+
+        return ResponseEntity.status(apiErrorCode.getHttpCode())
+                .body(response);
     }
 }

@@ -15,6 +15,8 @@ import com.mdv.identity_service.dto.request.IntrospectRequest;
 import com.mdv.identity_service.dto.response.AuthenticationResponse;
 import com.mdv.identity_service.dto.response.IntrospectResponse;
 import com.mdv.identity_service.entity.User;
+import com.mdv.identity_service.exception.ApiErrorCode;
+import com.mdv.identity_service.exception.ApiException;
 import com.mdv.identity_service.repository.UserRepository;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -59,13 +61,13 @@ public class AuthenticationService {
 
     public AuthenticationResponse authenticated(AuthenticationRequest request) {
         var user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not exist"));
+                .orElseThrow(() -> new ApiException(ApiErrorCode.USER_NOT_EXISTED));
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
         if (!authenticated) {
-            throw new RuntimeException("Invalid password");
+            throw new ApiException(ApiErrorCode.INVALID_PASSWORD);
         }
 
         String token = generateToken(user);

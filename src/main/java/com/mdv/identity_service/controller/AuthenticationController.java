@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mdv.identity_service.dto.request.AuthenticationRequest;
 import com.mdv.identity_service.dto.request.IntrospectRequest;
-import com.mdv.identity_service.dto.response.ApiRespone;
+import com.mdv.identity_service.dto.response.ApiResponse;
 import com.mdv.identity_service.dto.response.AuthenticationResponse;
 import com.mdv.identity_service.dto.response.IntrospectResponse;
 import com.mdv.identity_service.service.AuthenticationService;
@@ -28,15 +28,15 @@ public class AuthenticationController {
     AuthenticationService authenticationService;
 
     @PostMapping("/token")
-    ApiRespone<AuthenticationResponse> postMethodName(@RequestBody AuthenticationRequest request) {
+    ApiResponse<AuthenticationResponse> postMethodName(@RequestBody AuthenticationRequest request) {
         var result = authenticationService.authenticated(request);
-        return ApiRespone.<AuthenticationResponse>builder().code(200).result(result).build();
+        return ApiResponse.<AuthenticationResponse>builder().code(200).result(result).build();
     }
 
     @PostMapping("/introspect")
-    ApiRespone<IntrospectResponse> postMethodName(@RequestBody IntrospectRequest request)
+    ApiResponse<IntrospectResponse> postMethodName(@RequestBody IntrospectRequest request)
             throws JOSEException, ParseException {
         var result = authenticationService.introspect(request);
-        return ApiRespone.<IntrospectResponse>builder().code(200).result(result).build();
+        return ApiResponse.<IntrospectResponse>builder().code(200).result(result).build();
     }
 }
