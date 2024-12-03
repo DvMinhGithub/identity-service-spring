@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mdv.identity_service.dto.request.AuthenticationRequest;
 import com.mdv.identity_service.dto.request.IntrospectRequest;
 import com.mdv.identity_service.dto.request.LogoutRequest;
+import com.mdv.identity_service.dto.request.RefreshRequest;
 import com.mdv.identity_service.dto.response.ApiResponse;
 import com.mdv.identity_service.dto.response.AuthenticationResponse;
 import com.mdv.identity_service.dto.response.IntrospectResponse;
@@ -45,5 +46,11 @@ public class AuthenticationController {
     ApiResponse<Void> logout(@RequestBody LogoutRequest request) throws JOSEException, ParseException {
         authenticationService.logout(request);
         return ApiResponse.<Void>builder().code(200).build();
+    }
+
+    @PostMapping("/refresh")
+    ApiResponse<AuthenticationResponse> refresh(@RequestBody RefreshRequest request) throws ParseException, JOSEException {
+        var result = authenticationService.refreshToken(request);
+        return ApiResponse.<AuthenticationResponse>builder().code(200).result(result).build();
     }
 }

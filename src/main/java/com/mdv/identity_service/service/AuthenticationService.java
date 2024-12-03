@@ -14,6 +14,7 @@ import org.springframework.util.CollectionUtils;
 import com.mdv.identity_service.dto.request.AuthenticationRequest;
 import com.mdv.identity_service.dto.request.IntrospectRequest;
 import com.mdv.identity_service.dto.request.LogoutRequest;
+import com.mdv.identity_service.dto.request.RefreshRequest;
 import com.mdv.identity_service.dto.response.AuthenticationResponse;
 import com.mdv.identity_service.dto.response.IntrospectResponse;
 import com.mdv.identity_service.entity.InvalidatedToken;
@@ -83,17 +84,38 @@ public class AuthenticationService {
     }
 
     public void logout(LogoutRequest request) throws ParseException, JOSEException {
-        var signedToken = verifyToken(request.getToken());
+        verifyAndSaveInvalidToken(request.getToken());
+    }
 
-        String jit = signedToken.getJWTClaimsSet().getJWTID();
+    public AuthenticationResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
+        var signedToken = verifyAndSaveInvalidToken(request.getToken());
+
+        String username = signedToken.getJWTClaimsSet().getSubject();
+        var user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ApiException(ApiErrorCode.USER_NOT_EXISTED));
+
+        String newToken = generateToken(user);
+
+        return AuthenticationResponse.builder()
+                .token(newToken)
+                .authenticated(true)
+                .build();
+    }
+
+    SignedJWT verifyAndSaveInvalidToken(String token) throws ParseException, JOSEException {
+        var signedToken = verifyToken(token);
+
+        String jwtId = signedToken.getJWTClaimsSet().getJWTID();
         Date expireTime = signedToken.getJWTClaimsSet().getExpirationTime();
 
         InvalidatedToken invalidatedToken = InvalidatedToken.builder()
-                .id(jit)
+                .id(jwtId)
                 .expiryTime(expireTime)
                 .build();
 
         invalidatedTokenRepository.save(invalidatedToken);
+
+        return signedToken;
     }
 
     private SignedJWT verifyToken(String token) throws ParseException, JOSEException {
