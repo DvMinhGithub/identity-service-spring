@@ -33,7 +33,7 @@ public class UserService {
     @Autowired
     PasswordEncoder passwordEncoder;
 
-    public User createRequest(UserCreateRequest request) {
+    public User createUser(UserCreateRequest request) {
 
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username already exists: " + request.getUsername());
