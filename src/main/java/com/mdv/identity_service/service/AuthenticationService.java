@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.StringJoiner;
 import java.util.UUID;
 import java.text.ParseException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -37,10 +39,12 @@ import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = lombok.AccessLevel.PRIVATE)
+@Slf4j
 public class AuthenticationService {
     UserRepository userRepository;
     InvalidatedTokenRepository invalidatedTokenRepository;
@@ -49,12 +53,20 @@ public class AuthenticationService {
     @Value("${jwt.signerkey}")
     protected String SINGER_KEY;
 
+    @NonFinal
+    @Value("${jwt.valid-duration}")
+    protected int VALID_DURATION;
+
+    @NonFinal
+    @Value("${jwt.refresh-duration}")
+    protected int REFRESH_DURATION;
+
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
         var token = request.getToken();
         boolean valid = true;
 
         try {
-            verifyToken(token);
+            verifyToken(token, false);
         } catch (ApiException e) {
             valid = false;
         }
@@ -84,11 +96,15 @@ public class AuthenticationService {
     }
 
     public void logout(LogoutRequest request) throws ParseException, JOSEException {
-        verifyAndSaveInvalidToken(request.getToken());
+        try {
+            verifyAndSaveInvalidToken(request.getToken(), false);
+        } catch (Exception e) {
+            log.info(e.getMessage());
+        }
     }
 
     public AuthenticationResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
-        var signedToken = verifyAndSaveInvalidToken(request.getToken());
+        var signedToken = verifyAndSaveInvalidToken(request.getToken(), true);
 
         String username = signedToken.getJWTClaimsSet().getSubject();
         var user = userRepository.findByUsername(username)
@@ -102,8 +118,8 @@ public class AuthenticationService {
                 .build();
     }
 
-    SignedJWT verifyAndSaveInvalidToken(String token) throws ParseException, JOSEException {
-        var signedToken = verifyToken(token);
+    SignedJWT verifyAndSaveInvalidToken(String token, boolean isRefresh) throws ParseException, JOSEException {
+        var signedToken = verifyToken(token, isRefresh);
 
         String jwtId = signedToken.getJWTClaimsSet().getJWTID();
         Date expireTime = signedToken.getJWTClaimsSet().getExpirationTime();
@@ -118,12 +134,15 @@ public class AuthenticationService {
         return signedToken;
     }
 
-    private SignedJWT verifyToken(String token) throws ParseException, JOSEException {
+    private SignedJWT verifyToken(String token, boolean isRefresh) throws ParseException, JOSEException {
         JWSVerifier verifier = new MACVerifier(SINGER_KEY.getBytes());
 
         SignedJWT signedJWT = SignedJWT.parse(token);
 
-        Date expireTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+        Date expireTime = (isRefresh)
+                ? new Date(signedJWT.getJWTClaimsSet().getIssueTime().toInstant()
+                        .plus(REFRESH_DURATION, ChronoUnit.SECONDS).toEpochMilli())
+                : signedJWT.getJWTClaimsSet().getExpirationTime();
 
         var verify = signedJWT.verify(verifier);
 
@@ -145,7 +164,7 @@ public class AuthenticationService {
                 .subject(user.getUsername())
                 .issuer("mdv")
                 .issueTime(new Date())
-                .expirationTime(new Date(new Date().getTime() + 24 * 60 * 60 * 1000))
+                .expirationTime(new Date(Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScope(user))
                 .build();
