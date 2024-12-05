@@ -1,7 +1,7 @@
 package com.mdv.identity_service.service;
 
-import java.util.List;
 import java.util.HashSet;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -36,7 +36,9 @@ public class RoleService {
     }
 
     public List<RoleResponse> getAll() {
-        return roleRepository.findAll().stream().map(roleMapper::mapToRoleResponse).toList();
+        return roleRepository.findAll().stream()
+                .map(roleMapper::mapToRoleResponse)
+                .toList();
     }
 
     public void delete(String role) {

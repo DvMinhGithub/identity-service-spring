@@ -21,5 +21,6 @@ public class UserUpdateRequest {
 
     @DobConstraint(minAge = 18, message = "User must be at least 18 years old")
     LocalDate dob;
+
     List<String> roles;
 }

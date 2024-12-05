@@ -21,5 +21,4 @@ public class DobValidator implements ConstraintValidator<DobConstraint, LocalDat
 
         return dob.plusYears(minAge).isBefore(LocalDate.now());
     }
-    
 }

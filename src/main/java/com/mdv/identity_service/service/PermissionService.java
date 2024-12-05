@@ -29,7 +29,9 @@ public class PermissionService {
 
     public List<PermissionResponse> getAll() {
         List<Permission> permissions = permissionRepository.findAll();
-        return permissions.stream().map(permissionMapper::mapToPermissionResponse).toList();
+        return permissions.stream()
+                .map(permissionMapper::mapToPermissionResponse)
+                .toList();
     }
 
     public void delete(String permission) {

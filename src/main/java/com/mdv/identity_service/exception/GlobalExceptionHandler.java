@@ -48,16 +48,14 @@ public class GlobalExceptionHandler {
         ApiErrorCode apiErrorCode = ApiErrorCode.INVALID_KEY;
 
         FieldError fieldError = e.getBindingResult().getFieldError();
-        String message = (fieldError != null) ? fieldError.getDefaultMessage()
-                : apiErrorCode.getErrorMessage();
+        String message = (fieldError != null) ? fieldError.getDefaultMessage() : apiErrorCode.getErrorMessage();
 
         ApiResponse<?> response = ApiResponse.builder()
                 .code(apiErrorCode.getHttpCode())
                 .message(message)
                 .build();
 
-        return ResponseEntity.status(apiErrorCode.getHttpCode())
-                .body(response);
+        return ResponseEntity.status(apiErrorCode.getHttpCode()).body(response);
     }
 
     @ExceptionHandler(value = AccessDeniedException.class)
@@ -70,7 +68,6 @@ public class GlobalExceptionHandler {
                 .message(apiErrorCode.getErrorMessage())
                 .build();
 
-        return ResponseEntity.status(apiErrorCode.getHttpCode())
-                .body(response);
+        return ResponseEntity.status(apiErrorCode.getHttpCode()).body(response);
     }
 }

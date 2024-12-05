@@ -44,33 +44,35 @@ public class UserService {
 
         var roles = roleRepository.findAllById(request.getRoles());
         user.setRoles(new HashSet<>(roles));
-        
+
         return userRepository.save(user);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getUsers() {
-        return userRepository.findAll().stream().map(userMapper::mapToUserResponse).toList();
+        return userRepository.findAll().stream()
+                .map(userMapper::mapToUserResponse)
+                .toList();
     }
 
     @PostAuthorize("returnObject.username == authentication.name or hasRole('ADMIN')")
     public UserResponse getUser(String userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+        User user =
+                userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found: " + userId));
         return userMapper.mapToUserResponse(user);
     }
 
     public UserResponse getMyInfo() {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
-        User user = userRepository.findByUsername(name)
-                .orElseThrow(() -> new RuntimeException("User not found: " + name));
+        User user =
+                userRepository.findByUsername(name).orElseThrow(() -> new RuntimeException("User not found: " + name));
         return userMapper.mapToUserResponse(user);
     }
 
     public UserResponse updateUser(String userId, UserUpdateRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+        User user =
+                userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found: " + userId));
         userMapper.updateUser(user, request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 

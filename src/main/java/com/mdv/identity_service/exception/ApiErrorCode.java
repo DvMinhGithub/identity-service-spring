@@ -1,13 +1,13 @@
 package com.mdv.identity_service.exception;
 
+import org.springframework.http.HttpStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
 public enum ApiErrorCode {
-
     UNCATEGORIZED_EXCEPTION(500, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
 
     INVALID_KEY(400, "Invalid key", HttpStatus.BAD_REQUEST),

@@ -8,7 +8,6 @@ import com.mdv.identity_service.dto.response.RoleResponse;
 import com.mdv.identity_service.entity.Role;
 
 @Mapper(componentModel = "spring")
-
 public interface RoleMapper {
     @Mapping(target = "permissions", ignore = true)
     Role mapToRole(RoleRequest request);

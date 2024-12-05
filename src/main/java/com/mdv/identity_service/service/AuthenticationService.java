@@ -1,11 +1,11 @@
 package com.mdv.identity_service.service;
 
-import java.util.Date;
-import java.util.StringJoiner;
-import java.util.UUID;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.StringJoiner;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -71,13 +71,12 @@ public class AuthenticationService {
             valid = false;
         }
 
-        return IntrospectResponse.builder()
-                .valid(valid)
-                .build();
+        return IntrospectResponse.builder().valid(valid).build();
     }
 
     public AuthenticationResponse authenticated(AuthenticationRequest request) {
-        var user = userRepository.findByUsername(request.getUsername())
+        var user = userRepository
+                .findByUsername(request.getUsername())
                 .orElseThrow(() -> new ApiException(ApiErrorCode.USER_NOT_EXISTED));
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -107,7 +106,8 @@ public class AuthenticationService {
         var signedToken = verifyAndSaveInvalidToken(request.getToken(), true);
 
         String username = signedToken.getJWTClaimsSet().getSubject();
-        var user = userRepository.findByUsername(username)
+        var user = userRepository
+                .findByUsername(username)
                 .orElseThrow(() -> new ApiException(ApiErrorCode.USER_NOT_EXISTED));
 
         String newToken = generateToken(user);
@@ -124,10 +124,8 @@ public class AuthenticationService {
         String jwtId = signedToken.getJWTClaimsSet().getJWTID();
         Date expireTime = signedToken.getJWTClaimsSet().getExpirationTime();
 
-        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
-                .id(jwtId)
-                .expiryTime(expireTime)
-                .build();
+        InvalidatedToken invalidatedToken =
+                InvalidatedToken.builder().id(jwtId).expiryTime(expireTime).build();
 
         invalidatedTokenRepository.save(invalidatedToken);
 
@@ -140,8 +138,12 @@ public class AuthenticationService {
         SignedJWT signedJWT = SignedJWT.parse(token);
 
         Date expireTime = (isRefresh)
-                ? new Date(signedJWT.getJWTClaimsSet().getIssueTime().toInstant()
-                        .plus(REFRESH_DURATION, ChronoUnit.SECONDS).toEpochMilli())
+                ? new Date(signedJWT
+                        .getJWTClaimsSet()
+                        .getIssueTime()
+                        .toInstant()
+                        .plus(REFRESH_DURATION, ChronoUnit.SECONDS)
+                        .toEpochMilli())
                 : signedJWT.getJWTClaimsSet().getExpirationTime();
 
         var verify = signedJWT.verify(verifier);
@@ -164,7 +166,8 @@ public class AuthenticationService {
                 .subject(user.getUsername())
                 .issuer("mdv")
                 .issueTime(new Date())
-                .expirationTime(new Date(Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
+                .expirationTime(new Date(
+                        Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScope(user))
                 .build();

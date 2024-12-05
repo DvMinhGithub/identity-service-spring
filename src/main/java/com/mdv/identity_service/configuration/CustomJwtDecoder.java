@@ -31,8 +31,9 @@ public class CustomJwtDecoder implements JwtDecoder {
     @Override
     public Jwt decode(String token) throws JwtException {
         try {
-            var response =  authenticationService.introspect(IntrospectRequest.builder().token(token).build());
-            
+            var response = authenticationService.introspect(
+                    IntrospectRequest.builder().token(token).build());
+
             if (!response.isValid()) {
                 throw new JwtException("Invalid token");
             }
@@ -42,8 +43,7 @@ public class CustomJwtDecoder implements JwtDecoder {
 
         if (Objects.isNull(nimbusJwtDecoder)) {
             SecretKeySpec secretKeySpec = new SecretKeySpec(SINGER_KEY.getBytes(), "HS256");
-            nimbusJwtDecoder = NimbusJwtDecoder
-                    .withSecretKey(secretKeySpec)
+            nimbusJwtDecoder = NimbusJwtDecoder.withSecretKey(secretKeySpec)
                     .macAlgorithm(MacAlgorithm.HS256)
                     .build();
         }
