@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,6 +15,8 @@ import com.mdv.identity_service.dto.request.UserCreateRequest;
 import com.mdv.identity_service.dto.request.UserUpdateRequest;
 import com.mdv.identity_service.dto.response.UserResponse;
 import com.mdv.identity_service.entity.User;
+import com.mdv.identity_service.exception.ApiErrorCode;
+import com.mdv.identity_service.exception.ApiException;
 import com.mdv.identity_service.mapper.UserMapper;
 import com.mdv.identity_service.repository.RoleRepository;
 import com.mdv.identity_service.repository.UserRepository;
@@ -33,19 +36,20 @@ public class UserService {
     @Autowired
     PasswordEncoder passwordEncoder;
 
-    public User createUser(UserCreateRequest request) {
-
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists: " + request.getUsername());
-        }
-
+    public UserResponse createUser(UserCreateRequest request) {
         User user = userMapper.mapToUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         var roles = roleRepository.findAllById(request.getRoles());
         user.setRoles(new HashSet<>(roles));
 
-        return userRepository.save(user);
+        try {
+            user = userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new ApiException(ApiErrorCode.USER_EXISTED);
+        }
+
+        return userMapper.mapToUserResponse(user);
     }
 
     @PreAuthorize("hasRole('ADMIN')")

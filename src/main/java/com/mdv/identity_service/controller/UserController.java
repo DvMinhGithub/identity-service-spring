@@ -15,7 +15,6 @@ import com.mdv.identity_service.dto.request.UserCreateRequest;
 import com.mdv.identity_service.dto.request.UserUpdateRequest;
 import com.mdv.identity_service.dto.response.ApiResponse;
 import com.mdv.identity_service.dto.response.UserResponse;
-import com.mdv.identity_service.entity.User;
 import com.mdv.identity_service.service.UserService;
 
 import jakarta.validation.Valid;
@@ -31,8 +30,8 @@ public class UserController {
     UserService userService;
 
     @PostMapping
-    ApiResponse<User> createUser(@RequestBody @Valid UserCreateRequest request) {
-        User user = userService.createUser(request);
+    ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreateRequest request) {
+        UserResponse user = userService.createUser(request);
         return new ApiResponse<>(200, null, user);
     }
 
