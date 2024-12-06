@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    driver-class-name: DRIVER_CLASS_NAME
+    url: URL
+    username: USERNAME
+    password: PASSWORD
+
+jwt:
+  signerkey: SIGNERKEY
