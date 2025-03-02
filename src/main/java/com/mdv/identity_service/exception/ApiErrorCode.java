@@ -20,7 +20,8 @@ public enum ApiErrorCode {
 
     UNAUTHENTICATED(401, "Unauthenticated", HttpStatus.UNAUTHORIZED),
 
-    UNAUTHORIZED(403, "You do not have permission", HttpStatus.FORBIDDEN);
+    UNAUTHORIZED(403, "You do not have permission", HttpStatus.FORBIDDEN),
+    JWT_SIGNING_ERROR(500, "Error signing JWT", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final int httpCode;
     private final String errorMessage;

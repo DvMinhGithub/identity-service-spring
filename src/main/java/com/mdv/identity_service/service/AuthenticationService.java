@@ -23,6 +23,7 @@ import com.mdv.identity_service.entity.InvalidatedToken;
 import com.mdv.identity_service.entity.User;
 import com.mdv.identity_service.exception.ApiErrorCode;
 import com.mdv.identity_service.exception.ApiException;
+import com.mdv.identity_service.exception.JWTSigningException;
 import com.mdv.identity_service.repository.InvalidatedTokenRepository;
 import com.mdv.identity_service.repository.UserRepository;
 import com.nimbusds.jose.JOSEException;
@@ -51,15 +52,15 @@ public class AuthenticationService {
 
     @NonFinal
     @Value("${jwt.signerkey}")
-    protected String SINGER_KEY;
+    protected String singerKey;
 
     @NonFinal
     @Value("${jwt.valid-duration}")
-    protected int VALID_DURATION;
+    protected int validDuration;
 
     @NonFinal
     @Value("${jwt.refresh-duration}")
-    protected int REFRESH_DURATION;
+    protected int refreshDuration;
 
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
         var token = request.getToken();
@@ -133,7 +134,7 @@ public class AuthenticationService {
     }
 
     private SignedJWT verifyToken(String token, boolean isRefresh) throws ParseException, JOSEException {
-        JWSVerifier verifier = new MACVerifier(SINGER_KEY.getBytes());
+        JWSVerifier verifier = new MACVerifier(singerKey.getBytes());
 
         SignedJWT signedJWT = SignedJWT.parse(token);
 
@@ -142,7 +143,7 @@ public class AuthenticationService {
                         .getJWTClaimsSet()
                         .getIssueTime()
                         .toInstant()
-                        .plus(REFRESH_DURATION, ChronoUnit.HOURS)
+                        .plus(refreshDuration, ChronoUnit.HOURS)
                         .toEpochMilli())
                 : signedJWT.getJWTClaimsSet().getExpirationTime();
 
@@ -167,7 +168,7 @@ public class AuthenticationService {
                 .issuer("mdv")
                 .issueTime(new Date())
                 .expirationTime(new Date(
-                        Instant.now().plus(VALID_DURATION, ChronoUnit.HOURS).toEpochMilli()))
+                        Instant.now().plus(validDuration, ChronoUnit.HOURS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScope(user))
                 .build();
@@ -177,10 +178,10 @@ public class AuthenticationService {
         JWSObject jwsObject = new JWSObject(header, payload);
 
         try {
-            jwsObject.sign(new MACSigner(SINGER_KEY));
+            jwsObject.sign(new MACSigner(singerKey));
             return jwsObject.serialize();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new JWTSigningException("Error signing JWT token");
         }
     }
 
@@ -191,9 +192,7 @@ public class AuthenticationService {
                 joiner.add("ROLE_" + role.getName());
 
                 if (!CollectionUtils.isEmpty(role.getPermissions())) {
-                    role.getPermissions().forEach(permission -> {
-                        joiner.add(permission.getName());
-                    });
+                    role.getPermissions().forEach(permission -> joiner.add(permission.getName()));
                 }
             });
 

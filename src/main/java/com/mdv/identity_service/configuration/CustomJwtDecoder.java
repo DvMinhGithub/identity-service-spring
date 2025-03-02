@@ -5,7 +5,6 @@ import java.util.Objects;
 
 import javax.crypto.spec.SecretKeySpec;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -18,12 +17,15 @@ import com.mdv.identity_service.dto.request.IntrospectRequest;
 import com.mdv.identity_service.service.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
 
-@Component
-public class CustomJwtDecoder implements JwtDecoder {
-    @Value("${jwt.signerkey}")
-    private String SINGER_KEY;
+import lombok.RequiredArgsConstructor;
 
-    @Autowired
+@Component
+@RequiredArgsConstructor
+public class CustomJwtDecoder implements JwtDecoder {
+
+    @Value("${jwt.signerkey}")
+    private String singerKey;
+
     AuthenticationService authenticationService;
 
     private NimbusJwtDecoder nimbusJwtDecoder = null;
@@ -42,7 +44,7 @@ public class CustomJwtDecoder implements JwtDecoder {
         }
 
         if (Objects.isNull(nimbusJwtDecoder)) {
-            SecretKeySpec secretKeySpec = new SecretKeySpec(SINGER_KEY.getBytes(), "HS256");
+            SecretKeySpec secretKeySpec = new SecretKeySpec(singerKey.getBytes(), "HS256");
             nimbusJwtDecoder = NimbusJwtDecoder.withSecretKey(secretKeySpec)
                     .macAlgorithm(MacAlgorithm.HS256)
                     .build();

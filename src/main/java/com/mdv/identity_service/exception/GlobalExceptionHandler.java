@@ -16,11 +16,11 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = RuntimeException.class)
-    public ResponseEntity<ApiResponse<?>> handleRuntimeException(RuntimeException e) {
+    public ResponseEntity<ApiResponse<Void>> handleRuntimeException(RuntimeException e) {
         log.error("Internal server error", e);
 
         ApiErrorCode apiErrorCode = ApiErrorCode.UNCATEGORIZED_EXCEPTION;
-        ApiResponse<?> response = ApiResponse.builder()
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
                 .code(apiErrorCode.getHttpCode())
                 .message(apiErrorCode.getErrorMessage())
                 .build();
@@ -29,20 +29,20 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = ApiException.class)
-    public ResponseEntity<ApiResponse<?>> handleApiException(ApiException e) {
+    public ResponseEntity<ApiResponse<Void>> handleApiException(ApiException e) {
         log.error("API error", e);
 
         ApiErrorCode apiException = e.getApiErrorCode();
-        ApiResponse<?> response = ApiResponse.builder()
-                .code(e.getApiErrorCode().getHttpCode())
-                .message(e.getApiErrorCode().getErrorMessage())
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
+                .code(apiException.getHttpCode())
+                .message(apiException.getErrorMessage())
                 .build();
 
         return ResponseEntity.status(apiException.getHttpStatus()).body(response);
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<?>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         log.error("Invalid request", e);
 
         ApiErrorCode apiErrorCode = ApiErrorCode.INVALID_KEY;
@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
         FieldError fieldError = e.getBindingResult().getFieldError();
         String message = (fieldError != null) ? fieldError.getDefaultMessage() : apiErrorCode.getErrorMessage();
 
-        ApiResponse<?> response = ApiResponse.builder()
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
                 .code(apiErrorCode.getHttpCode())
                 .message(message)
                 .build();
@@ -59,11 +59,24 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = AccessDeniedException.class)
-    public ResponseEntity<ApiResponse<?>> handleAccessDeniedException(AccessDeniedException e) {
+    public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(AccessDeniedException e) {
         log.error("Access denied", e);
 
         ApiErrorCode apiErrorCode = ApiErrorCode.UNAUTHORIZED;
-        ApiResponse<?> response = ApiResponse.builder()
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
+                .code(apiErrorCode.getHttpCode())
+                .message(apiErrorCode.getErrorMessage())
+                .build();
+
+        return ResponseEntity.status(apiErrorCode.getHttpCode()).body(response);
+    }
+
+    @ExceptionHandler(value = JWTSigningException.class)
+    public ResponseEntity<ApiResponse<Void>> handleJWTSigningException(JWTSigningException e) {
+        log.error("JWT signing error", e);
+
+        ApiErrorCode apiErrorCode = ApiErrorCode.JWT_SIGNING_ERROR;
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
                 .code(apiErrorCode.getHttpCode())
                 .message(apiErrorCode.getErrorMessage())
                 .build();

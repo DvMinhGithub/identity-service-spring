@@ -3,7 +3,6 @@ package com.mdv.identity_service.service;
 import java.util.HashSet;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,20 +20,19 @@ import com.mdv.identity_service.mapper.UserMapper;
 import com.mdv.identity_service.repository.RoleRepository;
 import com.mdv.identity_service.repository.UserRepository;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class UserService {
-    UserRepository userRepository;
-    RoleRepository roleRepository;
-    UserMapper userMapper;
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final UserMapper userMapper;
+
+    private final PasswordEncoder passwordEncoder;
+
+    private static final String USER_NOT_FOUND = "User not found: ";
 
     public UserResponse createUser(UserCreateRequest request) {
         User user = userMapper.mapToUser(request);
@@ -61,22 +59,19 @@ public class UserService {
 
     @PostAuthorize("returnObject.username == authentication.name or hasRole('ADMIN')")
     public UserResponse getUser(String userId) {
-        User user =
-                userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found: " + userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException(USER_NOT_FOUND + userId));
         return userMapper.mapToUserResponse(user);
     }
 
     public UserResponse getMyInfo() {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
-        User user =
-                userRepository.findByUsername(name).orElseThrow(() -> new RuntimeException("User not found: " + name));
+        User user = userRepository.findByUsername(name).orElseThrow(() -> new RuntimeException(USER_NOT_FOUND + name));
         return userMapper.mapToUserResponse(user);
     }
 
     public UserResponse updateUser(String userId, UserUpdateRequest request) {
-        User user =
-                userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found: " + userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException(USER_NOT_FOUND + userId));
         userMapper.updateUser(user, request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
