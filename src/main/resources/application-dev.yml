@@ -3,8 +3,14 @@ spring:
     driver-class-name: 'com.mysql.cj.jdbc.Driver'
     url: 'jdbc:mysql://localhost:3306/identity_service?createDatabaseIfNotExist=true'
     username: root
-    password: 123456789
+    password: 123456
 
 jwt:
-  signerkey: "ihi80crc9LiT+2yvSqpTwOIJhfcMfvlX2AZCdAtoxkUyNT0W+odgk+AWcod1pLgx
-"
+  signerkey: "ihi80crc9LiT+2yvSqpTwOIJhfcMfvlX2AZCdAtoxkUyNT0W+odgk+AWcod1pLgx"
+
+logging:
+  level:
+    org:
+      springframework:
+        security: TRACE
+    
