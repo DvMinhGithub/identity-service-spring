@@ -14,6 +14,7 @@ import com.mdv.identity_service.dto.request.UserCreateRequest;
 import com.mdv.identity_service.dto.request.UserUpdateRequest;
 import com.mdv.identity_service.dto.response.UserResponse;
 import com.mdv.identity_service.entity.User;
+import com.mdv.identity_service.enums.Role;
 import com.mdv.identity_service.exception.ApiErrorCode;
 import com.mdv.identity_service.exception.ApiException;
 import com.mdv.identity_service.mapper.UserMapper;
@@ -33,13 +34,16 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     private static final String USER_NOT_FOUND = "User not found: ";
+    private static final String ROLE_NOT_FOUND = "Role not found: ";
 
     public UserResponse createUser(UserCreateRequest request) {
         User user = userMapper.mapToUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        var roles = roleRepository.findAllById(request.getRoles());
-        user.setRoles(new HashSet<>(roles));
+        var role = roleRepository
+                .findById(Role.USER.name())
+                .orElseThrow(() -> new RuntimeException(ROLE_NOT_FOUND + Role.USER.name()));
+        user.setRoles(new HashSet<>(List.of(role)));
 
         try {
             user = userRepository.save(user);

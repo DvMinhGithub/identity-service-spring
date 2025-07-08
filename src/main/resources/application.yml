@@ -18,3 +18,6 @@ spring:
 jwt:
   valid-duration: 1
   refresh-duration: 1
+
+app:
+  url: localhost:8080${server.servlet.context-path}
