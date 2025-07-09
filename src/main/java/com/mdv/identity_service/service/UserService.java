@@ -14,7 +14,7 @@ import com.mdv.identity_service.dto.request.UserCreateRequest;
 import com.mdv.identity_service.dto.request.UserUpdateRequest;
 import com.mdv.identity_service.dto.response.UserResponse;
 import com.mdv.identity_service.entity.User;
-import com.mdv.identity_service.enums.Role;
+import com.mdv.identity_service.enums.RoleType;
 import com.mdv.identity_service.exception.ApiErrorCode;
 import com.mdv.identity_service.exception.ApiException;
 import com.mdv.identity_service.mapper.UserMapper;
@@ -41,8 +41,8 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         var role = roleRepository
-                .findById(Role.USER.name())
-                .orElseThrow(() -> new RuntimeException(ROLE_NOT_FOUND + Role.USER.name()));
+                .findById(RoleType.USER.name())
+                .orElseThrow(() -> new RuntimeException(ROLE_NOT_FOUND + RoleType.USER.name()));
         user.setRoles(new HashSet<>(List.of(role)));
 
         try {

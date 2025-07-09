@@ -1,6 +1,6 @@
 package com.mdv.identity_service.enums;
 
-public enum Role {
+public enum RoleType {
     ADMIN,
     USER
 }
